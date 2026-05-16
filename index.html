@@ -564,8 +564,12 @@ async function lookupRoblox(){
   btn.disabled = true;
   txt.innerHTML = '<span class="spin"></span>';
 
+  // corsproxy.io contourne le CORS de l'API Roblox
+  const PROXY = 'https://corsproxy.io/?url=';
+
   try{
-    const res1 = await fetch('https://users.roblox.com/v1/usernames/users', {
+    // 1. Username → ID
+    const res1 = await fetch(PROXY + encodeURIComponent('https://users.roblox.com/v1/usernames/users'), {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({usernames:[username], excludeBannedUsers:false})
@@ -578,15 +582,16 @@ async function lookupRoblox(){
     const displayName = user.displayName;
     const name = user.name;
 
-    const res2 = await fetch(`https://users.roblox.com/v1/users/${userId}`);
+    // 2. Profil complet (date de création)
+    const res2 = await fetch(PROXY + encodeURIComponent(`https://users.roblox.com/v1/users/${userId}`));
     const profile = await res2.json();
 
-    const res3 = await fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
+    // 3. Avatar headshot
+    const res3 = await fetch(PROXY + encodeURIComponent(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`));
     const thumb = await res3.json();
     const avatarUrl = thumb.data?.[0]?.imageUrl || '';
 
-    const created = new Date(profile.created);
-    const joinYear = created.getFullYear();
+    const joinYear = new Date(profile.created).getFullYear();
 
     robloxData = { userId, name, displayName, avatarUrl, joinYear };
 
