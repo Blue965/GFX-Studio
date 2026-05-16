@@ -706,6 +706,22 @@ function showToast(type, msg){
   t.className = 'toast ' + type + ' show';
   setTimeout(() => t.classList.remove('show'), 4500);
 }
+
+/* ─── PROTECTION ─── */
+// Bloquer clic droit
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// Bloquer F12, Ctrl+Shift+I/J/C/U, Ctrl+U
+document.addEventListener('keydown', e => {
+  if(
+    e.key === 'F12' ||
+    (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key.toUpperCase())) ||
+    (e.ctrlKey && e.key.toUpperCase() === 'U')
+  ){
+    e.preventDefault();
+    return false;
+  }
+});
 </script>
 </body>
 </html>
