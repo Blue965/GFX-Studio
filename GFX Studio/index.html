@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GFX Studio — Roblox Graphics</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#05060d;
+  --s1:#090b15;
+  --s2:#0d1020;
+  --card:#0f1219;
+  --border:#1a1f30;
+  --border2:#252d45;
+  --r:#e63946;
+  --r2:#ff6b6b;
+  --gold:#f4c542;
+  --gold2:#ffa500;
+  --blue:#4cc9f0;
+  --green:#06d6a0;
+  --text:#dde4f5;
+  --muted:#525e80;
+  --muted2:#7a89b0;
+  --glow-r:rgba(230,57,70,0.2);
+  --glow-g:rgba(244,197,66,0.2);
+}
+
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;cursor:default}
+
+/* ── ANIMATED BG ── */
+.bg-layer{position:fixed;inset:0;pointer-events:none;z-index:0}
+.bg-grid{
+  background-image:
+    linear-gradient(rgba(230,57,70,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(230,57,70,0.03) 1px,transparent 1px);
+  background-size:60px 60px;
+  animation:gridShift 20s linear infinite;
+  width:100%;height:100%;
+}
+@keyframes gridShift{from{background-position:0 0}to{background-position:60px 60px}}
+
+.bg-glow1{position:absolute;width:600px;height:600px;top:-100px;left:-200px;background:radial-gradient(circle,rgba(230,57,70,0.08) 0%,transparent 70%);border-radius:50%}
+.bg-glow2{position:absolute;width:500px;height:500px;bottom:-100px;right:-150px;background:radial-gradient(circle,rgba(76,201,240,0.06) 0%,transparent 70%);border-radius:50%}
+
+/* ── LAYOUT ── */
+.wrap{position:relative;z-index:1;max-width:1160px;margin:0 auto;padding:0 28px}
+
+/* ── NAV ── */
+nav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(5,6,13,0.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:16px 28px;
+}
+.nav-inner{max-width:1160px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;letter-spacing:-0.5px}
+.nav-logo span{color:var(--r)}
+.nav-status{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--green);font-family:'Space Mono',monospace;letter-spacing:1px}
+.nav-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 6px var(--green)}50%{opacity:0.3;box-shadow:none}}
+
+/* ── HERO ── */
+header{padding:100px 28px 80px;text-align:center;position:relative;overflow:hidden}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;
+  color:var(--r);text-transform:uppercase;
+  border:1px solid rgba(230,57,70,0.3);
+  background:rgba(230,57,70,0.06);
+  padding:7px 18px;border-radius:2px;margin-bottom:32px;
+}
+.hero-tag::before{content:'';width:6px;height:6px;background:var(--r);border-radius:50%;animation:blink 1.5s ease infinite}
+
+h1{
+  font-family:'Syne',sans-serif;font-size:clamp(3rem,8vw,6.5rem);
+  font-weight:800;line-height:0.9;letter-spacing:-3px;
+  margin-bottom:24px;
+}
+h1 .line1{display:block;color:var(--text)}
+h1 .line2{
+  display:block;
+  background:linear-gradient(135deg,var(--gold) 0%,var(--r2) 50%,var(--r) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+
+.hero-sub{font-size:16px;color:var(--muted2);max-width:480px;margin:0 auto 48px;line-height:1.7;font-weight:300}
+
+.hero-stats{display:flex;justify-content:center;gap:48px;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-num{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--text)}
+.stat-num span{color:var(--r)}
+.stat-label{font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px;font-family:'Space Mono',monospace}
+
+/* ── SECTION TITLE ── */
+.section-head{display:flex;align-items:center;gap:16px;margin:64px 0 36px}
+.section-head::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent)}
+.section-title{font-family:'Syne',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:4px;color:var(--muted);text-transform:uppercase;white-space:nowrap}
+
+/* ── CARDS GRID ── */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:580px){.grid{grid-template-columns:1fr}}
+.grid-wide{grid-template-columns:repeat(2,1fr)}
+@media(max-width:700px){.grid-wide{grid-template-columns:1fr}}
+
+/* ── CARD ── */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:28px 26px;
+  position:relative;overflow:hidden;
+  transition:transform 0.35s cubic-bezier(.22,.61,.36,1),border-color 0.3s,box-shadow 0.3s;
+  animation:fadeUp 0.7s ease both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.card:nth-child(1){animation-delay:.05s}.card:nth-child(2){animation-delay:.1s}
+.card:nth-child(3){animation-delay:.15s}.card:nth-child(4){animation-delay:.2s}
+.card:nth-child(5){animation-delay:.25s}
+
+.card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--r),var(--r2));
+  transform:scaleX(0);transform-origin:left;
+  transition:transform 0.4s cubic-bezier(.22,.61,.36,1);
+}
+.card:hover{transform:translateY(-6px);border-color:rgba(230,57,70,0.28);box-shadow:0 24px 64px rgba(0,0,0,0.6),0 0 40px var(--glow-r)}
+.card:hover::after{transform:scaleX(1)}
+
+/* FEATURED */
+.card.feat{border-color:rgba(244,197,66,0.25);background:linear-gradient(160deg,#100f1a,#0d0c17)}
+.card.feat::after{background:linear-gradient(90deg,var(--gold),var(--gold2));transform:scaleX(1)}
+.card.feat:hover{border-color:rgba(244,197,66,0.5);box-shadow:0 24px 64px rgba(0,0,0,0.6),0 0 50px var(--glow-g)}
+.feat-ribbon{
+  position:absolute;top:14px;right:14px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#000;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;padding:4px 10px;border-radius:2px;
+}
+
+.card-accent{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--r);text-transform:uppercase;margin-bottom:10px}
+.card.feat .card-accent{color:var(--gold)}
+.card-name{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:800;margin-bottom:4px;letter-spacing:-0.5px}
+.card-price{font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;color:var(--r);line-height:1;margin-bottom:22px}
+.card.feat .card-price{color:var(--gold)}
+.card-price sub{font-size:0.9rem;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:300;margin-left:2px;vertical-align:middle}
+
+.feats{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:26px}
+.feats li{font-size:13px;color:var(--muted2);display:flex;align-items:flex-start;gap:10px;line-height:1.5}
+.feats li::before{content:'→';color:var(--r);flex-shrink:0;font-family:'Space Mono',monospace;font-size:11px;margin-top:1px}
+.card.feat .feats li::before{color:var(--gold)}
+
+/* ── BUTTONS ── */
+.btn{
+  display:block;width:100%;text-align:center;
+  padding:13px 20px;border-radius:5px;
+  font-family:'Space Mono',monospace;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  border:none;cursor:pointer;transition:all 0.25s ease;text-decoration:none;
+}
+.btn-r{background:linear-gradient(135deg,var(--r),#b5202e);color:#fff}
+.btn-r:hover{background:linear-gradient(135deg,var(--r2),var(--r));box-shadow:0 0 28px rgba(230,57,70,0.5);transform:scale(1.02)}
+.btn-g{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000}
+.btn-g:hover{box-shadow:0 0 28px rgba(244,197,66,0.45);transform:scale(1.02)}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--muted2)}
+.btn-outline:hover{border-color:var(--r);color:var(--r);background:rgba(230,57,70,0.05)}
+
+/* ── TOS ── */
+.tos-box{
+  background:var(--card);border:1px solid var(--border);border-left:3px solid var(--r);
+  border-radius:8px;padding:36px;margin-bottom:20px;
+}
+.tos-box h2{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;letter-spacing:2px;color:var(--r);margin-bottom:24px}
+.tos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:22px}
+.tos-row{display:flex;gap:14px}
+.tos-ico{font-size:20px;flex-shrink:0;margin-top:2px}
+.tos-k{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--r);text-transform:uppercase;margin-bottom:5px}
+.tos-v{font-size:13px;color:var(--muted2);line-height:1.65}
+.tos-v strong{color:var(--text)}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);padding:32px 28px;text-align:center;margin-top:40px}
+footer p{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);letter-spacing:1px}
+footer strong{color:var(--r)}
+
+/* ══════════════ MODAL ══════════════ */
+.overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,0.88);backdrop-filter:blur(10px);
+  z-index:200;justify-content:center;align-items:center;padding:20px;
+}
+.overlay.open{display:flex}
+
+.modal{
+  background:var(--s2);border:1px solid var(--border2);border-radius:10px;
+  width:100%;max-width:500px;overflow:hidden;
+  animation:popIn 0.25s cubic-bezier(.22,.61,.36,1);
+  position:relative;
+}
+@keyframes popIn{from{opacity:0;transform:scale(0.93) translateY(10px)}to{opacity:1;transform:scale(1)}}
+
+.modal-top{
+  background:linear-gradient(135deg,var(--card),var(--s2));
+  border-bottom:1px solid var(--border);
+  padding:24px 28px 20px;
+  display:flex;align-items:flex-start;justify-content:space-between;
+}
+.modal-top-left h3{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:4px}
+.modal-top-left p{font-size:13px;color:var(--muted2)}
+.modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px;line-height:1;transition:color 0.2s}
+.modal-close:hover{color:var(--text)}
+
+.modal-body{padding:24px 28px}
+
+/* Steps */
+.step{margin-bottom:22px}
+.step-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.step-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.step-num{background:var(--r);color:#fff;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0}
+
+/* Input */
+.input-group{margin-bottom:14px}
+.input-group label{font-size:12px;color:var(--muted2);display:block;margin-bottom:6px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px}
+.inp{
+  width:100%;background:var(--card);border:1px solid var(--border2);border-radius:5px;
+  padding:11px 14px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;
+  transition:border-color 0.2s,box-shadow 0.2s;outline:none;
+}
+.inp:focus{border-color:var(--r);box-shadow:0 0 0 3px rgba(230,57,70,0.12)}
+.inp::placeholder{color:var(--muted)}
+
+/* Roblox lookup result */
+.roblox-card{
+  display:none;background:var(--card);border:1px solid var(--border2);border-radius:6px;
+  padding:14px;gap:12px;align-items:center;margin-top:10px;
+}
+.roblox-card.show{display:flex}
+.roblox-avatar{width:52px;height:52px;border-radius:8px;object-fit:cover;border:2px solid var(--border2);flex-shrink:0}
+.roblox-info{}
+.roblox-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;margin-bottom:2px}
+.roblox-meta{font-size:12px;color:var(--muted2);font-family:'Space Mono',monospace}
+.roblox-badges{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.rbadge{font-size:10px;padding:2px 8px;border-radius:100px;font-family:'Space Mono',monospace;letter-spacing:1px}
+.rbadge.green{background:rgba(6,214,160,0.12);border:1px solid rgba(6,214,160,0.3);color:var(--green)}
+.rbadge.blue{background:rgba(76,201,240,0.12);border:1px solid rgba(76,201,240,0.3);color:var(--blue)}
+
+.lookup-btn{
+  display:flex;align-items:center;gap:8px;background:rgba(76,201,240,0.08);
+  border:1px solid rgba(76,201,240,0.25);color:var(--blue);
+  padding:9px 16px;border-radius:5px;cursor:pointer;font-family:'Space Mono',monospace;
+  font-size:10px;letter-spacing:1.5px;text-transform:uppercase;margin-top:8px;
+  transition:all 0.2s;white-space:nowrap;flex-shrink:0;
+}
+.lookup-btn:hover{background:rgba(76,201,240,0.15);border-color:rgba(76,201,240,0.5)}
+.lookup-btn:disabled{opacity:0.5;cursor:not-allowed}
+.lookup-row{display:flex;gap:8px;align-items:flex-end}
+.lookup-row .input-group{flex:1;margin:0}
+
+/* Service summary */
+.summary-box{
+  background:var(--card);border:1px solid var(--border);border-radius:6px;
+  padding:14px 16px;display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;
+}
+.summary-name{font-family:'Syne',sans-serif;font-weight:800;font-size:0.95rem}
+.summary-price{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--r)}
+.summary-price.gold{color:var(--gold)}
+
+/* Note field */
+.note-area{
+  width:100%;background:var(--card);border:1px solid var(--border2);border-radius:5px;
+  padding:11px 14px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;
+  resize:vertical;min-height:70px;outline:none;transition:border-color 0.2s;
+}
+.note-area:focus{border-color:var(--r);box-shadow:0 0 0 3px rgba(230,57,70,0.12)}
+.note-area::placeholder{color:var(--muted)}
+
+/* Action row */
+.modal-footer{padding:0 28px 24px;display:flex;gap:10px}
+.modal-footer .btn{flex:1}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--s2);border:1px solid var(--border2);border-radius:6px;
+  padding:14px 22px;font-size:13px;font-family:'Space Mono',monospace;letter-spacing:1px;
+  z-index:999;opacity:0;transition:all 0.35s ease;pointer-events:none;white-space:nowrap;
+  display:flex;align-items:center;gap:10px;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:rgba(6,214,160,0.4);color:var(--green)}
+.toast.err{border-color:rgba(230,57,70,0.4);color:var(--r2)}
+
+/* Spinner */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.2);border-top-color:currentColor;border-radius:50%;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+
+
+@media(max-width:600px){
+  .hero-stats{gap:28px}
+  .modal-body{padding:20px}
+  .modal-footer{padding:0 20px 20px;flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<!-- BG -->
+<div class="bg-layer">
+  <div class="bg-grid"></div>
+  <div class="bg-glow1"></div>
+  <div class="bg-glow2"></div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">GFX<span>.</span>STUDIO</div>
+    <div class="nav-status"><span class="nav-dot"></span>OUVERT AUX COMMANDES</div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header>
+  <div class="hero-tag">✦ Roblox Graphics Designer</div>
+  <h1>
+    <span class="line1">GRAPHICS</span>
+    <span class="line2">PREMIUM</span>
+  </h1>
+  <p class="hero-sub">Créations graphiques Roblox haut de gamme. GFX, icônes, bannières — livrés rapidement, qualité garantie.</p>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">50<span>+</span></div><div class="stat-label">Commandes livrées</div></div>
+    <div class="stat"><div class="stat-num">5<span>★</span></div><div class="stat-label">Satisfaction client</div></div>
+    <div class="stat"><div class="stat-num">24<span>h</span></div><div class="stat-label">Délai max</div></div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- SERVICES -->
+  <div class="section-head"><span class="section-title">Nos services</span></div>
+
+  <div class="grid">
+    <div class="card" onclick="openModal('GFX Simple','15',false)">
+      <div class="card-accent">Tier 01</div>
+      <div class="card-name">GFX Simple</div>
+      <div class="card-price">15 <sub>Robux</sub></div>
+      <ul class="feats">
+        <li>Pose basique personnalisée</li>
+        <li>Fond simple ou transparent</li>
+        <li>Éclairage standard propre</li>
+      </ul>
+      <button class="btn btn-r">Commander →</button>
+    </div>
+
+    <div class="card" onclick="openModal('GFX Amélioré','20',false)">
+      <div class="card-accent">Tier 02</div>
+      <div class="card-name">GFX Amélioré</div>
+      <div class="card-price">20 <sub>Robux</sub></div>
+      <ul class="feats">
+        <li>Rendu soigné et détaillé</li>
+        <li>Éclairage cycles / raytracing</li>
+        <li>Effets glow & lumières</li>
+      </ul>
+      <button class="btn btn-r">Commander →</button>
+    </div>
+
+    <div class="card feat" onclick="openModal('GFX Premium','30',true)">
+      <div class="feat-ribbon">⭐ BEST</div>
+      <div class="card-accent">Tier 03 — Premium</div>
+      <div class="card-name">GFX Premium</div>
+      <div class="card-price">30 <sub>Robux</sub></div>
+      <ul class="feats">
+        <li>Décor complet en 3D</li>
+        <li>Accessoires complexes</li>
+        <li>Retouches Photoshop poussées</li>
+      </ul>
+      <button class="btn btn-g">Commander →</button>
+    </div>
+  </div>
+
+  <div class="grid grid-wide" style="margin-top:16px">
+    <div class="card" onclick="openModal('Icône Groupe / Jeu','25',false)">
+      <div class="card-accent">Icône</div>
+      <div class="card-name">Icône Groupe / Jeu</div>
+      <div class="card-price">25 <sub>Robux</sub></div>
+      <ul class="feats">
+        <li>Format carré haute qualité</li>
+        <li>Texte personnalisé stylisé</li>
+        <li>Effets accrocheurs</li>
+      </ul>
+      <button class="btn btn-r">Commander →</button>
+    </div>
+
+    <div class="card" onclick="openModal('Bannière YouTube / Twitter','35',false)">
+      <div class="card-accent">Bannière</div>
+      <div class="card-name">Bannière YT / Twitter</div>
+      <div class="card-price">35 <sub>Robux</sub></div>
+      <ul class="feats">
+        <li>Format large haute résolution</li>
+        <li>Plusieurs personnages intégrés</li>
+        <li>Texte 3D stylisé</li>
+      </ul>
+      <button class="btn btn-r">Commander →</button>
+    </div>
+  </div>
+
+  <!-- TOS -->
+  <div class="section-head" style="margin-top:60px"><span class="section-title">Terms of Service</span></div>
+  <div class="tos-box">
+    <h2>CONDITIONS DE COMMANDE</h2>
+    <div class="tos-grid">
+      <div class="tos-row">
+        <div class="tos-ico">💳</div>
+        <div>
+          <div class="tos-k">Paiement</div>
+          <div class="tos-v">Par <strong>Gamepass</strong> ou <strong>T-Shirt</strong> Roblox. Attention aux <strong style="color:var(--r)">30% de taxe</strong> Roblox prélevés automatiquement.</div>
+        </div>
+      </div>
+      <div class="tos-row">
+        <div class="tos-ico">⚡</div>
+        <div>
+          <div class="tos-k">Délai de livraison</div>
+          <div class="tos-v">Livraison <strong>rapide</strong> après validation de la commande et confirmation du paiement.</div>
+        </div>
+      </div>
+      <div class="tos-row">
+        <div class="tos-ico">🔄</div>
+        <div>
+          <div class="tos-k">Modifications</div>
+          <div class="tos-v"><strong>Retouches gratuites</strong> incluses dans chaque commande. Votre satisfaction est ma priorité.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>© 2025 <strong>GFX Studio</strong> — Toutes les commandes finalisées sur Discord</p>
+  </div>
+</footer>
+
+<!-- ══ MODAL COMMANDE ══ -->
+<div class="overlay" id="overlay">
+<div class="modal">
+  <div class="modal-top">
+    <div class="modal-top-left">
+      <h3 id="m-title">Commander</h3>
+      <p id="m-sub">Remplissez le formulaire ci-dessous</p>
+    </div>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+  </div>
+
+  <div class="modal-body">
+    <!-- Service summary -->
+    <div class="summary-box">
+      <div class="summary-name" id="m-service">GFX Premium</div>
+      <div class="summary-price" id="m-price">30 Robux</div>
+    </div>
+
+    <!-- Step 1 -->
+    <div class="step">
+      <div class="step-label"><span class="step-num">1</span>Votre profil Roblox</div>
+      <div class="lookup-row">
+        <div class="input-group">
+          <label>Nom d'utilisateur Roblox</label>
+          <input class="inp" type="text" id="robloxUser" placeholder="ex: Noob123" oninput="resetLookup()"/>
+        </div>
+        <button class="lookup-btn" id="lookupBtn" onclick="lookupRoblox()">
+          <span id="lookupBtnTxt">🔍 Vérifier</span>
+        </button>
+      </div>
+      <div class="roblox-card" id="robloxCard">
+        <img class="roblox-avatar" id="rblxAvatar" src="" alt="avatar"/>
+        <div class="roblox-info">
+          <div class="roblox-name" id="rblxName">—</div>
+          <div class="roblox-meta" id="rblxMeta">ID: —</div>
+          <div class="roblox-badges">
+            <span class="rbadge green">✓ Profil vérifié</span>
+            <span class="rbadge blue" id="rblxJoined">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step">
+      <div class="step-label"><span class="step-num">2</span>Vos informations Discord</div>
+      <div class="input-group">
+        <label>Tag Discord</label>
+        <input class="inp" type="text" id="discordTag" placeholder="ex: username ou user#1234"/>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step" style="margin-bottom:0">
+      <div class="step-label"><span class="step-num">3</span>Détails de la commande</div>
+      <textarea class="note-area" id="orderNote" placeholder="Décrivez votre commande : pose souhaitée, couleurs, personnage Roblox, accessoires..."></textarea>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn btn-outline" onclick="closeModal()">Annuler</button>
+    <button class="btn btn-r" id="submitBtn" onclick="submitOrder()">
+      <span id="submitTxt">Envoyer la commande</span>
+    </button>
+  </div>
+</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ─── CONFIG — METS TON WEBHOOK ICI ─── */
+const WEBHOOK_URL = 'METS_TON_WEBHOOK_ICI';
+/* ─────────────────────────────────────── */
+
+let currentService = '', currentPrice = '', isFeat = false;
+let robloxData = null;
+
+/* ─── MODAL ─── */
+function openModal(service, price, feat){
+  currentService = service; currentPrice = price; isFeat = feat;
+  robloxData = null;
+  document.getElementById('m-title').textContent = service;
+  document.getElementById('m-sub').textContent = 'Remplissez les infos pour passer commande';
+  document.getElementById('m-service').textContent = service;
+  const priceEl = document.getElementById('m-price');
+  priceEl.textContent = price + ' Robux';
+  priceEl.className = 'summary-price' + (feat ? ' gold' : '');
+  document.getElementById('robloxUser').value = '';
+  document.getElementById('discordTag').value = '';
+  document.getElementById('orderNote').value = '';
+  document.getElementById('robloxCard').classList.remove('show');
+  document.getElementById('submitBtn').className = 'btn ' + (feat ? 'btn-g' : 'btn-r');
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(){
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('overlay').addEventListener('click', e => { if(e.target===document.getElementById('overlay')) closeModal(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+
+/* ─── ROBLOX LOOKUP ─── */
+function resetLookup(){
+  document.getElementById('robloxCard').classList.remove('show');
+  robloxData = null;
+}
+
+async function lookupRoblox(){
+  const username = document.getElementById('robloxUser').value.trim();
+  if(!username){ showToast('err','Entrez un nom d\'utilisateur Roblox'); return; }
+  const btn = document.getElementById('lookupBtn');
+  const txt = document.getElementById('lookupBtnTxt');
+  btn.disabled = true;
+  txt.innerHTML = '<span class="spin"></span>';
+
+  try{
+    const res1 = await fetch('https://users.roblox.com/v1/usernames/users', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({usernames:[username], excludeBannedUsers:false})
+    });
+    const d1 = await res1.json();
+    if(!d1.data || d1.data.length === 0) throw new Error('Utilisateur introuvable');
+
+    const user = d1.data[0];
+    const userId = user.id;
+    const displayName = user.displayName;
+    const name = user.name;
+
+    const res2 = await fetch(`https://users.roblox.com/v1/users/${userId}`);
+    const profile = await res2.json();
+
+    const res3 = await fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
+    const thumb = await res3.json();
+    const avatarUrl = thumb.data?.[0]?.imageUrl || '';
+
+    const created = new Date(profile.created);
+    const joinYear = created.getFullYear();
+
+    robloxData = { userId, name, displayName, avatarUrl, joinYear };
+
+    document.getElementById('rblxAvatar').src = avatarUrl;
+    document.getElementById('rblxName').textContent = displayName + (displayName !== name ? ` (@${name})` : '');
+    document.getElementById('rblxMeta').textContent = `ID: ${userId}`;
+    document.getElementById('rblxJoined').textContent = `Membre depuis ${joinYear}`;
+    document.getElementById('robloxCard').classList.add('show');
+
+  } catch(err){
+    showToast('err', '❌ ' + (err.message || 'Profil Roblox introuvable'));
+  } finally {
+    btn.disabled = false;
+    txt.innerHTML = '🔍 Vérifier';
+  }
+}
+
+/* ─── SUBMIT → WEBHOOK ─── */
+async function submitOrder(){
+  const discord = document.getElementById('discordTag').value.trim();
+  const note = document.getElementById('orderNote').value.trim();
+  const robloxUsername = document.getElementById('robloxUser').value.trim();
+
+  if(!robloxUsername){ showToast('err','Entrez votre nom d\'utilisateur Roblox'); return; }
+  if(!robloxData){ showToast('err','Clique sur "Vérifier" pour valider ton profil Roblox'); return; }
+  if(!discord){ showToast('err','Entrez votre tag Discord'); return; }
+
+  const btn = document.getElementById('submitBtn');
+  const txt = document.getElementById('submitTxt');
+  btn.disabled = true;
+  txt.innerHTML = '<span class="spin"></span> Envoi...';
+
+  const now = new Date();
+  const orderNum = '#' + Math.random().toString(36).substr(2,6).toUpperCase();
+
+  const colorMap = {
+    'GFX Simple': 0xff6b6b,
+    'GFX Amélioré': 0xff8c00,
+    'GFX Premium': 0xf4c542,
+    'Icône Groupe / Jeu': 0x4cc9f0,
+    'Bannière YouTube / Twitter': 0x06d6a0,
+  };
+
+  const payload = {
+    username: "GFX Studio",
+    avatar_url: "https://i.imgur.com/AfFp7pu.png",
+    embeds: [{
+      title: `📦 Nouvelle Commande — ${currentService}`,
+      color: colorMap[currentService] || 0xe63946,
+      thumbnail: { url: robloxData.avatarUrl },
+      fields: [
+        {
+          name: "🎮 Profil Roblox",
+          value: `**${robloxData.displayName}** (\`@${robloxData.name}\`)\nID: \`${robloxData.userId}\`\nMembre depuis **${robloxData.joinYear}**\n🔗 [Voir le profil](https://www.roblox.com/users/${robloxData.userId}/profile)`,
+          inline: true
+        },
+        {
+          name: "💬 Discord",
+          value: `\`${discord}\``,
+          inline: true
+        },
+        {
+          name: "🛒 Service commandé",
+          value: `**${currentService}**\nPrix : **${currentPrice} Robux**`,
+          inline: false
+        },
+        {
+          name: "📝 Détails / Description",
+          value: note || "_Aucune description fournie_",
+          inline: false
+        },
+        {
+          name: "🔢 Référence commande",
+          value: `\`${orderNum}\``,
+          inline: true
+        },
+        {
+          name: "🕐 Date",
+          value: `<t:${Math.floor(now.getTime()/1000)}:F>`,
+          inline: true
+        },
+      ],
+      footer: { text: "GFX Studio • Système de commandes" },
+      timestamp: now.toISOString()
+    }]
+  };
+
+  try{
+    const res = await fetch(WEBHOOK_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    if(res.ok || res.status === 204){
+      showToast('ok', '✅ Commande envoyée ! Réf : ' + orderNum);
+      setTimeout(closeModal, 1800);
+    } else {
+      throw new Error('Erreur ' + res.status);
+    }
+  } catch(err){
+    showToast('err','❌ Erreur : ' + err.message);
+  } finally {
+    btn.disabled = false;
+    txt.textContent = 'Envoyer la commande';
+  }
+}
+
+/* ─── TOAST ─── */
+function showToast(type, msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.classList.remove('show'), 4500);
+}
+</script>
+</body>
+</html>
